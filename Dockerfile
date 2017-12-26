@@ -23,7 +23,7 @@ RUN mkdir -p /tmp \
     && apt-get update \
     && export DEBIAN_FRONTEND="noninteractive" \
     && echo "Install Dependencies..." \
-    && apt-get install -y --no-install-recommends wget ca-certificates openjdk-8-jre bash git openssl supervisor nginx apache2-utils make g++ \
+    && apt-get install -y --no-install-recommends wget ca-certificates openjdk-8-jre bash git openssl supervisor make g++ \
     && echo "Download [Elasticsearch]..." \
     && wget --progress=bar:force https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$ELK_VERSION.deb \
     && wget --progress=bar:force https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$ELK_VERSION.deb.sha512 \
@@ -46,6 +46,7 @@ RUN mkdir -p /tmp \
     && chmod +x /sbin/su-exec \
     && echo "Clean Up..." \
     && apt-get remove --purge -y make g++ git wget \
+    && apt autoremove -y \
     && rm -rf /tmp/* \
     && rm -rf /var/lib/apt/lists/*
 
@@ -56,11 +57,10 @@ ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
 
 COPY supervisord.conf /etc/
 COPY entrypoint.sh /entrypoint.sh
-COPY kibana.conf /etc/nginx/sites-enabled/
 COPY logstash-log4js.conf /var/opt/logstash/
 
 VOLUME ["/var/opt/elasticsearch", "/var/opt/logstash"]
-EXPOSE 9200 9300 5601 5000 5000/udp 80
+EXPOSE 9200 9300 5601 5000 5000/udp
 
 ENTRYPOINT ["/entrypoint.sh"]
 
